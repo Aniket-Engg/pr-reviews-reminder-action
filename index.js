@@ -28,10 +28,13 @@ function sendNotification(webhookUrl, channel, message) {
   return axios({
     method: 'POST',
     url: webhookUrl,
-    data: {
-      channel: channel,
-      username: 'Pull Request reviews reminder',
+    data: {      
       text: message,
+    },
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${secrets.GITTER_TOKEN}`
     }
   });
 }

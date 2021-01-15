@@ -449,7 +449,7 @@ function getPullRequestsWithRequestedReviewers(pullRequests) {
 }
 
 function prettyMessage(prs) {
-  let message = 'Hey guys, just a tiny reminder about PRs that need review\n';
+  let message = 'Hey guys! just a tiny reminder about PRs that need review\n';
   for (const pr of prs) {
       message += `[${pr.html_url}](${pr.html_url}) - `
       for (const user of pr.requested_reviewers) {
@@ -852,7 +852,7 @@ async function main() {
     const pullRequestsWithRequestedReviewers = getPullRequestsWithRequestedReviewers(pullRequests.data);
     core.info(`There are ${pullRequestsWithRequestedReviewers.length} pull requests waiting for reviews`);
     if (pullRequestsWithRequestedReviewers.length) {
-      const message = prettyMessage(pr2user, github2provider, provider);
+      const message = prettyMessage(pullRequestsWithRequestedReviewers);
       await sendNotification(webhookUrl, channel, message);
       core.info(`Notification sent successfully!`);
     }

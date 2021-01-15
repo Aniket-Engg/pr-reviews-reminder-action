@@ -3,7 +3,7 @@ function getPullRequestsWithRequestedReviewers(pullRequests) {
 }
 
 function prettyMessage(prs) {
-  let message = 'Hey guys, just a tiny reminder about PRs that need review\n';
+  let message = 'Hey guys! just a tiny reminder about PRs that need review\n';
   for (const pr of prs) {
       message += `[${pr.html_url}](${pr.html_url}) - `
       for (const user of pr.requested_reviewers) {

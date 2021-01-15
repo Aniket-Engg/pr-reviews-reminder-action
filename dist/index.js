@@ -462,7 +462,6 @@ function prettyMessage(prs) {
 
 module.exports = {
   getPullRequestsWithRequestedReviewers,
-  createPr2UserArray,
   prettyMessage
 };
 

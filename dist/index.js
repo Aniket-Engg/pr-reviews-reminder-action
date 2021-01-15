@@ -952,9 +952,12 @@ function sendNotification(webhookUrl, channel, message) {
     method: 'POST',
     url: webhookUrl,
     data: {
-      channel: channel,
-      username: 'Pull Request reviews reminder',
-      text: message,
+      text: message
+    },
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${secrets.GITTER_TOKEN}`
     }
   });
 }

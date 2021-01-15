@@ -4,9 +4,7 @@ const axios = require('axios');
 
 const {
   getPullRequestsWithRequestedReviewers,
-  createPr2UserArray,
   prettyMessage,
-  stringToObject
 } = require("./functions");
 
 const GITHUB_API_URL = 'https://api.github.com';
@@ -24,35 +22,24 @@ function getPullRequests() {
   });
 }
 
-function sendNotification(webhookUrl, channel, message) {
-  return axios({
-    method: 'POST',
-    url: webhookUrl,
-    data: {      
-      text: message,
-    },
-    headers: {
+function sendNotification(webhookUrl, message) {
+  console.log(message)
+  return axios.post(webhookUrl, { text : message }, {headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Bearer ${GITTER_TOKEN}`
-    }
-  });
+    }})
 }
 
 async function main() {
   try {
-    const webhookUrl = core.getInput('webhook-url');
-    const provider = core.getInput('provider');
-    const channel = core.getInput('channel');
-    const github2providerString = core.getInput('github-provider-map');
+    const webhookUrl = core.getInput('webhook-url');   
     core.info('Getting open pull requests...');
     const pullRequests = await getPullRequests();
     core.info(`There are ${pullRequests.data.length} open pull requests`);
     const pullRequestsWithRequestedReviewers = getPullRequestsWithRequestedReviewers(pullRequests.data);
     core.info(`There are ${pullRequestsWithRequestedReviewers.length} pull requests waiting for reviews`);
     if (pullRequestsWithRequestedReviewers.length) {
-      const pr2user = createPr2UserArray(pullRequestsWithRequestedReviewers);
-      const github2provider = stringToObject(github2providerString);
       const message = prettyMessage(pr2user, github2provider, provider);
       await sendNotification(webhookUrl, channel, message);
       core.info(`Notification sent successfully!`);

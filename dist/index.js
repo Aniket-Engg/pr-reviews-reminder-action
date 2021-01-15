@@ -448,8 +448,8 @@ function getPullRequestsWithRequestedReviewers(pullRequests) {
   return pullRequests.filter(pr => pr.requested_reviewers.length);
 }
 
-function prettyMessage(prs) {
-  let message = 'Hey guys! just a tiny reminder about PRs that need review\n';
+function prettyMessage(prs, title) {
+  let message = title + '\n';
   for (const pr of prs) {
       message += `[${pr.html_url}](${pr.html_url}) - `
       for (const user of pr.requested_reviewers) {
@@ -826,36 +826,46 @@ const AUTH_HEADER = {
 };
 const PULLS_ENDPOINT = `${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/pulls`;
 
-function getPullRequests() {
+function getPullRequests(endPoint) {
+
   return axios({
     method: 'GET',
-    url: PULLS_ENDPOINT,
+    url: endPoint,
     headers: AUTH_HEADER
   });
 }
 
 function sendNotification(webhookUrl, message) {
   console.log(message)
-  return axios.post(webhookUrl, { text : message }, {headers: {
+  return axios.post(webhookUrl, { text : message }, { headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Bearer ${GITTER_TOKEN}`
     }})
 }
 
+async function doRepo(pulls_endpoint, webhookUrl, title) {
+  const pullRequests = await getPullRequests(pulls_endpoint);
+  core.info(`There are ${pullRequests.data.length} open pull requests`);
+  const pullRequestsWithRequestedReviewers = getPullRequestsWithRequestedReviewers(pullRequests.data);
+  core.info(`There are ${pullRequestsWithRequestedReviewers.length} pull requests waiting for reviews`);
+  if (pullRequestsWithRequestedReviewers.length) {
+    const message = prettyMessage(pullRequestsWithRequestedReviewers, title);
+    await sendNotification(webhookUrl, message);
+    core.info(`Notification sent successfully!`);
+  }
+}
+
 async function main() {
   try {
     const webhookUrl = core.getInput('webhook-url');   
+    await sendNotification(webhookUrl, 'Hey guys! just a tiny reminder about PRs that need review')
     core.info('Getting open pull requests...');
-    const pullRequests = await getPullRequests();
-    core.info(`There are ${pullRequests.data.length} open pull requests`);
-    const pullRequestsWithRequestedReviewers = getPullRequestsWithRequestedReviewers(pullRequests.data);
-    core.info(`There are ${pullRequestsWithRequestedReviewers.length} pull requests waiting for reviews`);
-    if (pullRequestsWithRequestedReviewers.length) {
-      const message = prettyMessage(pullRequestsWithRequestedReviewers);
-      await sendNotification(webhookUrl, channel, message);
-      core.info(`Notification sent successfully!`);
-    }
+    await doRepo(PULLS_ENDPOINT, webhookUrl, 'remix-project')
+    await doRepo(`${GITHUB_API_URL}/repos/ethereum/remix-plugins-directory/pulls`, webhookUrl, 'remix-plugins-directory')
+    await doRepo(`${GITHUB_API_URL}/repos/ethereum/remix-ide/pulls`, webhookUrl, 'remix-ide (documentation)')
+    await doRepo(`${GITHUB_API_URL}/repos/ethereum/remix-desktop/pulls`, webhookUrl, 'remix-desktop')   
+    await sendNotification(webhookUrl, 'Before starting your task for the day, please use the first 30 mins from your work hours to review pending PRs assigned to you.') 
   } catch (error) {
     core.setFailed(error.message);
   }

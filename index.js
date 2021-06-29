@@ -53,7 +53,7 @@ async function main() {
     await doRepo(`${GITHUB_API_URL}/repos/ethereum/remix-plugins-directory/pulls`, webhookUrl, 'remix-plugins-directory')
     await doRepo(`${GITHUB_API_URL}/repos/ethereum/remix-ide/pulls`, webhookUrl, 'remix-ide (documentation)')
     await doRepo(`${GITHUB_API_URL}/repos/ethereum/remix-desktop/pulls`, webhookUrl, 'remix-desktop')   
-    await sendNotification(webhookUrl, 'Before starting your task for the day, please use the first 30 mins from your work hours to review pending PRs assigned to you.') 
+    await sendNotification(webhookUrl, '#### Before starting your task for the day, please use the first 30 mins from your work hours to review pending PRs assigned to you.')
   } catch (error) {
     core.setFailed(error.message);
   }

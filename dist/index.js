@@ -448,21 +448,8 @@ function getPullRequestsWithRequestedReviewers(pullRequests) {
   return pullRequests.filter(pr => pr.requested_reviewers.length);
 }
 
-function prettyMessage(prs, title) {
-  let message = title + '\n';
-  for (const pr of prs) {
-      message += `[${pr.html_url}](${pr.html_url}) - `
-      for (const user of pr.requested_reviewers) {
-          message += ` @${user.login}`
-      }
-      message += '\n'
-  }
-  return message;
-}
-
 module.exports = {
   getPullRequestsWithRequestedReviewers,
-  prettyMessage
 };
 
 
@@ -816,7 +803,6 @@ const axios = __webpack_require__(53);
 
 const {
   getPullRequestsWithRequestedReviewers,
-  prettyMessage,
 } = __webpack_require__(77);
 
 const GITHUB_API_URL = 'https://api.github.com';
@@ -836,26 +822,39 @@ function getPullRequests(endPoint) {
 }
 
 function sendNotification(webhookUrl, message) {
-  console.log('sendNotification:' + message)
-  // return axios.post(webhookUrl, { text : message }, { headers: {
-  //     'Content-Type': 'application/json',
-  //     'Accept': 'application/json'
-  //     // 'Authorization': `Bearer ${GITTER_TOKEN}`
-  //   }})
     return axios.post(webhookUrl, { content : message }, { headers: {
       'Content-Type': 'application/json'
     }})
 }
 
+function sendEmbed(webhookUrl, embed) {
+  return axios.post(webhookUrl, { embed }, { headers: {
+    'Content-Type': 'application/json'
+  }})
+}
+
 async function doRepo(pulls_endpoint, webhookUrl, title) {
   core.info('doRepo--pulls_endpoint->', pulls_endpoint)
   const pullRequests = await getPullRequests(pulls_endpoint);
+  core.info(pullRequests)
   core.info(`There are ${pullRequests.data.length} open pull requests`);
   const pullRequestsWithRequestedReviewers = getPullRequestsWithRequestedReviewers(pullRequests.data);
   core.info(`There are ${pullRequestsWithRequestedReviewers.length} pull requests waiting for reviews`);
   if (pullRequestsWithRequestedReviewers.length) {
-    const message = prettyMessage(pullRequestsWithRequestedReviewers, title);
-    await sendNotification(webhookUrl, message);
+    for (const pr of prs) {
+      let embed = {}
+      let reviewers = null
+      for (const user of pr.requested_reviewers)
+        reviewers += ` @${user.login}`
+      
+      embed.title = title
+      embed.url = pr.html_url
+      embed.fields = [{
+        name: "Review required by:",
+        value: reviewers
+      }]
+      await sendEmbed(webhookUrl, embed);
+    }
     core.info(`Notification sent successfully!`);
   }
 }

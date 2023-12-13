@@ -25,6 +25,7 @@ function getPullRequests(endPoint) {
 
 function sendNotification(webhookUrl, message) {
   console.log(message)
+  console.log(message)
   return axios.post(webhookUrl, { text : message }, { headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json'
@@ -33,7 +34,7 @@ function sendNotification(webhookUrl, message) {
 }
 
 async function doRepo(pulls_endpoint, webhookUrl, title) {
-  console.log('doRepo--pulls_endpoint->', pulls_endpoint)
+  core.info('doRepo--pulls_endpoint->', pulls_endpoint)
   const pullRequests = await getPullRequests(pulls_endpoint);
   core.info(`There are ${pullRequests.data.length} open pull requests`);
   const pullRequestsWithRequestedReviewers = getPullRequestsWithRequestedReviewers(pullRequests.data);
@@ -56,6 +57,7 @@ async function main() {
     await doRepo(`${GITHUB_API_URL}/repos/ethereum/remix-desktop/pulls`, webhookUrl, 'remix-desktop')   
     await sendNotification(webhookUrl, '#### Before starting your task for the day, please use the first 30 mins from your work hours to review pending PRs assigned to you.')
   } catch (error) {
+    core.error(error)
     core.setFailed(error.message);
   }
 }

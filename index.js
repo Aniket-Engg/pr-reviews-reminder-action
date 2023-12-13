@@ -28,7 +28,7 @@ function sendNotification(webhookUrl, message) {
   return axios.post(webhookUrl, { text : message }, { headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      'Authorization': `Bearer ${GITTER_TOKEN}`
+      // 'Authorization': `Bearer ${GITTER_TOKEN}`
     }})
 }
 

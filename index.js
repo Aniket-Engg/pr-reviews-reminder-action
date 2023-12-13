@@ -37,11 +37,11 @@ function sendEmbed(webhookUrl, embed) {
 async function doRepo(pulls_endpoint, webhookUrl, title) {
   core.info('doRepo--pulls_endpoint->', pulls_endpoint)
   const pullRequests = await getPullRequests(pulls_endpoint);
-  core.info(pullRequests)
-  core.info(`There are ${pullRequests.data.length} open pull requests`);
-  const pullRequestsWithRequestedReviewers = getPullRequestsWithRequestedReviewers(pullRequests.data);
-  core.info(`There are ${pullRequestsWithRequestedReviewers.length} pull requests waiting for reviews`);
-  if (pullRequestsWithRequestedReviewers.length) {
+  await sendNotification(webhookUrl, `Hey guys! There are ${pullRequests.data.length} open pull requests`);
+  const prs = getPullRequestsWithRequestedReviewers(pullRequests.data);
+  core.info(`There are ${prs.length} pull requests waiting for reviews`);
+  if (prs.length) {
+    console.log(prs)
     for (const pr of prs) {
       let embed = {}
       let reviewers = null
@@ -64,7 +64,7 @@ async function main() {
   try {
     core.info('inside main');
     const webhookUrl = core.getInput('webhook-url');   
-    await sendNotification(webhookUrl, 'Hey guys! just a tiny reminder about PRs that need review')
+    // await sendNotification(webhookUrl, 'Hey guys! just a tiny reminder about PRs that need review')
     core.info('Getting open pull requests...');
     await doRepo(PULLS_ENDPOINT, webhookUrl, 'remix-project')
     await doRepo(`${GITHUB_API_URL}/repos/ethereum/remix-plugins-directory/pulls`, webhookUrl, 'remix-plugins-directory')

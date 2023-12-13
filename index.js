@@ -15,7 +15,7 @@ const AUTH_HEADER = {
 const PULLS_ENDPOINT = `${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/pulls`;
 
 function getPullRequests(endPoint) {
-
+  console.log('getPullRequests--endPoint->', endPoint)
   return axios({
     method: 'GET',
     url: endPoint,
@@ -27,12 +27,13 @@ function sendNotification(webhookUrl, message) {
   console.log(message)
   return axios.post(webhookUrl, { text : message }, { headers: {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      'Accept': 'application/json'
       // 'Authorization': `Bearer ${GITTER_TOKEN}`
     }})
 }
 
 async function doRepo(pulls_endpoint, webhookUrl, title) {
+  console.log('doRepo--pulls_endpoint->', pulls_endpoint)
   const pullRequests = await getPullRequests(pulls_endpoint);
   core.info(`There are ${pullRequests.data.length} open pull requests`);
   const pullRequestsWithRequestedReviewers = getPullRequestsWithRequestedReviewers(pullRequests.data);

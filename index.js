@@ -30,7 +30,7 @@ function sendNotification(webhookUrl, message) {
   //     'Accept': 'application/json'
   //     // 'Authorization': `Bearer ${GITTER_TOKEN}`
   //   }})
-    return axios.post(webhookUrl, { text : message }, { headers: {
+    return axios.post(webhookUrl, { content : message }, { headers: {
       'Content-Type': 'application/json'
     }})
 }

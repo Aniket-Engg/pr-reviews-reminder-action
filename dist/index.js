@@ -836,13 +836,13 @@ function getPullRequests(endPoint) {
 }
 
 function sendNotification(webhookUrl, message) {
-  console.log(message)
+  console.log('sendNotification:' + message)
   // return axios.post(webhookUrl, { text : message }, { headers: {
   //     'Content-Type': 'application/json',
   //     'Accept': 'application/json'
   //     // 'Authorization': `Bearer ${GITTER_TOKEN}`
   //   }})
-    return axios.post(webhookUrl, { text : message }, { headers: {
+    return axios.post(webhookUrl, { content : message }, { headers: {
       'Content-Type': 'application/json'
     }})
 }

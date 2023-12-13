@@ -48,6 +48,7 @@ async function doRepo(pulls_endpoint, webhookUrl, title) {
 
 async function main() {
   try {
+    core.info('inside main');
     const webhookUrl = core.getInput('webhook-url');   
     await sendNotification(webhookUrl, 'Hey guys! just a tiny reminder about PRs that need review')
     core.info('Getting open pull requests...');

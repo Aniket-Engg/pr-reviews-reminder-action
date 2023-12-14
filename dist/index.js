@@ -846,7 +846,7 @@ async function doRepo(pulls_endpoint, webhookUrl, title) {
   core.info(`There are ${prs.length} pull requests waiting for reviews`);
   if (prs.length) {
     console.log(prs)
-    let embeds
+    let embeds = []
     for (const pr of prs) {
       let embed = {}
       let reviewers = null

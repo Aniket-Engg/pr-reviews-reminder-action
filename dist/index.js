@@ -827,10 +827,15 @@ function sendNotification(webhookUrl, message) {
     }})
 }
 
-function sendEmbed(webhookUrl, embed) {
-  return axios.post(webhookUrl, { embed }, { headers: {
-    'Content-Type': 'application/json'
-  }})
+function sendEmbeds(webhookUrl, embeds) {
+  return axios({
+    method: 'POST',
+    url: webhookUrl,
+    headers: {
+      'Content-Type': 'application/json'
+    } ,
+    data: JSON.stringify({ embeds })
+  })
 }
 
 async function doRepo(pulls_endpoint, webhookUrl, title) {
@@ -841,6 +846,7 @@ async function doRepo(pulls_endpoint, webhookUrl, title) {
   core.info(`There are ${prs.length} pull requests waiting for reviews`);
   if (prs.length) {
     console.log(prs)
+    let embeds
     for (const pr of prs) {
       let embed = {}
       let reviewers = null
@@ -853,8 +859,9 @@ async function doRepo(pulls_endpoint, webhookUrl, title) {
         name: "Review required by:",
         value: reviewers
       }]
-      await sendEmbed(webhookUrl, embed);
+      embeds.push(embed)
     }
+    await sendEmbeds(webhookUrl, embeds);
     core.info(`Notification sent successfully!`);
   }
 }

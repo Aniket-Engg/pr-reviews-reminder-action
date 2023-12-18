@@ -55,16 +55,17 @@ async function doRepo(pulls_endpoint, webhookUrl, title) {
       for (const user of pr.requested_reviewers)
         reviewers += ` @${user.login}`
       
-      embed.title = title
+      embed.title = pr.title
       embed.url = pr.html_url
-      embed.fields = [{
-        name: "Review required by:",
-        value: reviewers
-      }]
+      // embed.fields = [{
+      //   name: "Review required by:",
+      //   value: reviewers
+      // }]
       console.log('embed--->', embed)
       embeds.push(embed)
+      await sendEmbeds(webhookUrl, embeds);
+
     }
-    await sendEmbeds(webhookUrl, embeds);
     core.info(`Notification sent successfully!`);
   }
 }

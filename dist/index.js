@@ -843,7 +843,6 @@ async function doRepo(pulls_endpoint, webhookUrl, title) {
   core.info(`There are ${prs.length} pull requests waiting for reviews`);
   if (prs.length) {
     const count = prs.length > 10 ? 10 : prs.length
-    await sendNotification(webhookUrl, `@team A gentle request to review ${prs.length} pending PRs under ${title} repo. ${count > 10 ? `Here are ${count} of them:` : ''}`);
     let embeds = []
     for (let i=0; i < count; i++) {
       const pr = prs[i]
@@ -857,6 +856,7 @@ async function doRepo(pulls_endpoint, webhookUrl, title) {
       embeds.push(embed)
     }
     await sendEmbeds(webhookUrl, embeds);
+    await sendNotification(webhookUrl, `@team A gentle request to review ${prs.length} pending PRs under ${title} repo. ${prs.length > 10 ? `${count} of them are listed above.` : ''}`);
     core.info(`Notification sent successfully!`);
   }
 }

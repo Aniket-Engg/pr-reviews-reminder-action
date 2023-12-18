@@ -448,21 +448,8 @@ function getPullRequestsWithRequestedReviewers(pullRequests) {
   return pullRequests.filter(pr => pr.requested_reviewers.length);
 }
 
-function prettyMessage(prs, title) {
-  let message = title + '\n';
-  for (const pr of prs) {
-      message += `[${pr.html_url}](${pr.html_url}) - `
-      for (const user of pr.requested_reviewers) {
-          message += ` @${user.login}`
-      }
-      message += '\n'
-  }
-  return message;
-}
-
 module.exports = {
   getPullRequestsWithRequestedReviewers,
-  prettyMessage
 };
 
 
@@ -816,18 +803,16 @@ const axios = __webpack_require__(53);
 
 const {
   getPullRequestsWithRequestedReviewers,
-  prettyMessage,
 } = __webpack_require__(77);
 
 const GITHUB_API_URL = 'https://api.github.com';
-const { GITHUB_TOKEN, GITHUB_REPOSITORY, GITTER_TOKEN } = process.env;
+const { GITHUB_TOKEN, GITHUB_REPOSITORY } = process.env;
 const AUTH_HEADER = {
   Authorization: `token ${GITHUB_TOKEN}`
 };
 const PULLS_ENDPOINT = `${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/pulls`;
 
 function getPullRequests(endPoint) {
-
   return axios({
     method: 'GET',
     url: endPoint,
@@ -836,22 +821,42 @@ function getPullRequests(endPoint) {
 }
 
 function sendNotification(webhookUrl, message) {
-  console.log(message)
-  return axios.post(webhookUrl, { text : message }, { headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': `Bearer ${GITTER_TOKEN}`
+    return axios.post(webhookUrl, { content : message }, { headers: {
+      'Content-Type': 'application/json'
     }})
+}
+
+function sendEmbeds(webhookUrl, embeds) {
+  return axios({
+    method: 'POST',
+    url: webhookUrl,
+    headers: {
+      'Content-Type': 'application/json'
+    } ,
+    data: JSON.stringify({ embeds })
+  })
 }
 
 async function doRepo(pulls_endpoint, webhookUrl, title) {
   const pullRequests = await getPullRequests(pulls_endpoint);
-  core.info(`There are ${pullRequests.data.length} open pull requests`);
-  const pullRequestsWithRequestedReviewers = getPullRequestsWithRequestedReviewers(pullRequests.data);
-  core.info(`There are ${pullRequestsWithRequestedReviewers.length} pull requests waiting for reviews`);
-  if (pullRequestsWithRequestedReviewers.length) {
-    const message = prettyMessage(pullRequestsWithRequestedReviewers, title);
-    await sendNotification(webhookUrl, message);
+  const prs = getPullRequestsWithRequestedReviewers(pullRequests.data);
+  core.info(`There are ${prs.length} pull requests waiting for reviews`);
+  if (prs.length) {
+    const count = prs.length > 10 ? 10 : prs.length
+    let embeds = []
+    for (let i=0; i < count; i++) {
+      const pr = prs[i]
+      let embed = {}
+      let reviewers = ''
+      for (const user of pr.requested_reviewers)
+        reviewers += ` @${user.login}`
+      
+      embed.title = pr.title + ' => Reviewers: ' + reviewers
+      embed.url = pr.html_url
+      embeds.push(embed)
+    }
+    await sendEmbeds(webhookUrl, embeds);
+    await sendNotification(webhookUrl, `@team A gentle request to review ${prs.length} pending PRs under ${title} repo. ${prs.length > 10 ? `${count} of them are listed above.` : ''}`);
     core.info(`Notification sent successfully!`);
   }
 }
@@ -859,14 +864,13 @@ async function doRepo(pulls_endpoint, webhookUrl, title) {
 async function main() {
   try {
     const webhookUrl = core.getInput('webhook-url');   
-    await sendNotification(webhookUrl, 'Hey guys! just a tiny reminder about PRs that need review')
     core.info('Getting open pull requests...');
     await doRepo(PULLS_ENDPOINT, webhookUrl, 'remix-project')
     await doRepo(`${GITHUB_API_URL}/repos/ethereum/remix-plugins-directory/pulls`, webhookUrl, 'remix-plugins-directory')
     await doRepo(`${GITHUB_API_URL}/repos/ethereum/remix-ide/pulls`, webhookUrl, 'remix-ide (documentation)')
     await doRepo(`${GITHUB_API_URL}/repos/ethereum/remix-desktop/pulls`, webhookUrl, 'remix-desktop')   
-    await sendNotification(webhookUrl, '#### Before starting your task for the day, please use the first 30 mins from your work hours to review pending PRs assigned to you.')
   } catch (error) {
+    core.error(error)
     core.setFailed(error.message);
   }
 }
@@ -1486,7 +1490,7 @@ module.exports = require("assert");
 /***/ 361:
 /***/ (function(module) {
 
-module.exports = {"_args":[["axios@0.21.1","/home/yann/pr-reviews-reminder-action"]],"_from":"axios@0.21.1","_id":"axios@0.21.1","_inBundle":false,"_integrity":"sha512-dKQiRHxGD9PPRIUNIWvZhPTPpl1rf/OxTYKsqKUDjBwYylTvV7SjSHJb9ratfyzM6wCdLCOYLzs73qpg5c4iGA==","_location":"/axios","_phantomChildren":{},"_requested":{"type":"version","registry":true,"raw":"axios@0.21.1","name":"axios","escapedName":"axios","rawSpec":"0.21.1","saveSpec":null,"fetchSpec":"0.21.1"},"_requiredBy":["/"],"_resolved":"https://registry.npmjs.org/axios/-/axios-0.21.1.tgz","_spec":"0.21.1","_where":"/home/yann/pr-reviews-reminder-action","author":{"name":"Matt Zabriskie"},"browser":{"./lib/adapters/http.js":"./lib/adapters/xhr.js"},"bugs":{"url":"https://github.com/axios/axios/issues"},"bundlesize":[{"path":"./dist/axios.min.js","threshold":"5kB"}],"dependencies":{"follow-redirects":"^1.10.0"},"description":"Promise based HTTP client for the browser and node.js","devDependencies":{"bundlesize":"^0.17.0","coveralls":"^3.0.0","es6-promise":"^4.2.4","grunt":"^1.0.2","grunt-banner":"^0.6.0","grunt-cli":"^1.2.0","grunt-contrib-clean":"^1.1.0","grunt-contrib-watch":"^1.0.0","grunt-eslint":"^20.1.0","grunt-karma":"^2.0.0","grunt-mocha-test":"^0.13.3","grunt-ts":"^6.0.0-beta.19","grunt-webpack":"^1.0.18","istanbul-instrumenter-loader":"^1.0.0","jasmine-core":"^2.4.1","karma":"^1.3.0","karma-chrome-launcher":"^2.2.0","karma-coverage":"^1.1.1","karma-firefox-launcher":"^1.1.0","karma-jasmine":"^1.1.1","karma-jasmine-ajax":"^0.1.13","karma-opera-launcher":"^1.0.0","karma-safari-launcher":"^1.0.0","karma-sauce-launcher":"^1.2.0","karma-sinon":"^1.0.5","karma-sourcemap-loader":"^0.3.7","karma-webpack":"^1.7.0","load-grunt-tasks":"^3.5.2","minimist":"^1.2.0","mocha":"^5.2.0","sinon":"^4.5.0","typescript":"^2.8.1","url-search-params":"^0.10.0","webpack":"^1.13.1","webpack-dev-server":"^1.14.1"},"homepage":"https://github.com/axios/axios","jsdelivr":"dist/axios.min.js","keywords":["xhr","http","ajax","promise","node"],"license":"MIT","main":"index.js","name":"axios","repository":{"type":"git","url":"git+https://github.com/axios/axios.git"},"scripts":{"build":"NODE_ENV=production grunt build","coveralls":"cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js","examples":"node ./examples/server.js","fix":"eslint --fix lib/**/*.js","postversion":"git push && git push --tags","preversion":"npm test","start":"node ./sandbox/server.js","test":"grunt test && bundlesize","version":"npm run build && grunt version && git add -A dist && git add CHANGELOG.md bower.json package.json"},"typings":"./index.d.ts","unpkg":"dist/axios.min.js","version":"0.21.1"};
+module.exports = {"name":"axios","version":"0.21.1","description":"Promise based HTTP client for the browser and node.js","main":"index.js","scripts":{"test":"grunt test && bundlesize","start":"node ./sandbox/server.js","build":"NODE_ENV=production grunt build","preversion":"npm test","version":"npm run build && grunt version && git add -A dist && git add CHANGELOG.md bower.json package.json","postversion":"git push && git push --tags","examples":"node ./examples/server.js","coveralls":"cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js","fix":"eslint --fix lib/**/*.js"},"repository":{"type":"git","url":"https://github.com/axios/axios.git"},"keywords":["xhr","http","ajax","promise","node"],"author":"Matt Zabriskie","license":"MIT","bugs":{"url":"https://github.com/axios/axios/issues"},"homepage":"https://github.com/axios/axios","devDependencies":{"bundlesize":"^0.17.0","coveralls":"^3.0.0","es6-promise":"^4.2.4","grunt":"^1.0.2","grunt-banner":"^0.6.0","grunt-cli":"^1.2.0","grunt-contrib-clean":"^1.1.0","grunt-contrib-watch":"^1.0.0","grunt-eslint":"^20.1.0","grunt-karma":"^2.0.0","grunt-mocha-test":"^0.13.3","grunt-ts":"^6.0.0-beta.19","grunt-webpack":"^1.0.18","istanbul-instrumenter-loader":"^1.0.0","jasmine-core":"^2.4.1","karma":"^1.3.0","karma-chrome-launcher":"^2.2.0","karma-coverage":"^1.1.1","karma-firefox-launcher":"^1.1.0","karma-jasmine":"^1.1.1","karma-jasmine-ajax":"^0.1.13","karma-opera-launcher":"^1.0.0","karma-safari-launcher":"^1.0.0","karma-sauce-launcher":"^1.2.0","karma-sinon":"^1.0.5","karma-sourcemap-loader":"^0.3.7","karma-webpack":"^1.7.0","load-grunt-tasks":"^3.5.2","minimist":"^1.2.0","mocha":"^5.2.0","sinon":"^4.5.0","typescript":"^2.8.1","url-search-params":"^0.10.0","webpack":"^1.13.1","webpack-dev-server":"^1.14.1"},"browser":{"./lib/adapters/http.js":"./lib/adapters/xhr.js"},"jsdelivr":"dist/axios.min.js","unpkg":"dist/axios.min.js","typings":"./index.d.ts","dependencies":{"follow-redirects":"^1.10.0"},"bundlesize":[{"path":"./dist/axios.min.js","threshold":"5kB"}]};
 
 /***/ }),
 

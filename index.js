@@ -52,7 +52,7 @@ async function doRepo(pulls_endpoint, webhookUrl, title) {
       for (const user of pr.requested_reviewers)
         reviewers += ` @${user.login}`
       
-      embed.title = pr.title + ' Review required from: ' + reviewers
+      embed.title = pr.title + ' => Reviewers: ' + reviewers
       embed.url = pr.html_url
       embeds.push(embed)
     }

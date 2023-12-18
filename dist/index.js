@@ -828,6 +828,7 @@ function sendNotification(webhookUrl, message) {
 }
 
 function sendEmbeds(webhookUrl, embeds) {
+  console.log('sendEmbeds--embeds->', embeds)
   return axios({
     method: 'POST',
     url: webhookUrl,
@@ -859,6 +860,7 @@ async function doRepo(pulls_endpoint, webhookUrl, title) {
         name: "Review required by:",
         value: reviewers
       }]
+      console.log('embed--->', embed)
       embeds.push(embed)
     }
     await sendEmbeds(webhookUrl, embeds);

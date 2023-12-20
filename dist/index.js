@@ -856,7 +856,7 @@ async function doRepo(pulls_endpoint, webhookUrl, title) {
       embeds.push(embed)
     }
     await sendEmbeds(webhookUrl, embeds);
-    await sendNotification(webhookUrl, `@team A gentle request to review ${prs.length} pending PRs under ${title} repo. ${prs.length > 10 ? `${count} of them are listed above.` : ''}`);
+    await sendNotification(webhookUrl, `@everyone A gentle request to review **${prs.length} pending PRs** under __${title}__ repo. ${prs.length > 10 ? `${count} of them are listed above.` : ''}`);
     core.info(`Notification sent successfully!`);
   }
 }
@@ -867,7 +867,7 @@ async function main() {
     core.info('Getting open pull requests...');
     await doRepo(PULLS_ENDPOINT, webhookUrl, 'remix-project')
     await doRepo(`${GITHUB_API_URL}/repos/ethereum/remix-plugins-directory/pulls`, webhookUrl, 'remix-plugins-directory')
-    await doRepo(`${GITHUB_API_URL}/repos/ethereum/remix-ide/pulls`, webhookUrl, 'remix-ide (documentation)')
+    await doRepo(`${GITHUB_API_URL}/repos/ethereum/remix-ide/pulls`, webhookUrl, 'remix-ide')
     await doRepo(`${GITHUB_API_URL}/repos/ethereum/remix-desktop/pulls`, webhookUrl, 'remix-desktop')   
   } catch (error) {
     core.error(error)

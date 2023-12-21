@@ -812,6 +812,15 @@ const AUTH_HEADER = {
 };
 const PULLS_ENDPOINT = `${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/pulls`;
 
+const discordIDs = {
+  'Aniket-Engg' : '621970622716575747',
+  'yann300': '425335058652463117',
+  'bunsenstraat': '660074606539046915',
+  'joeizang': '629376310812344330',
+  'vermouth22': '678640402261082132',
+  'STetsing': '802198368340017153'
+}
+
 function getPullRequests(endPoint) {
   return axios({
     method: 'GET',
@@ -842,18 +851,17 @@ async function doRepo(pulls_endpoint, webhookUrl, title) {
   const prs = getPullRequestsWithRequestedReviewers(pullRequests.data);
   core.info(`There are ${prs.length} pull requests waiting for reviews`);
   if (prs.length) {
-    const count = prs.length > 10 ? 10 : prs.length
-    let message
-    for (let i=0; i < count; i++) {
+    let message = ''
+    for (let i=0; i < prs.length; i++) {
       const pr = prs[i]      
       let reviewers = ''
       for (const user of pr.requested_reviewers)
-        reviewers += ` @${user.login}`
+        reviewers += ` <@${discordIDs[user.login] || user.login}>`
 
-      message += `[${pr.title}](${pr.html_url}) => Reviewers: ${reviewers} \n`
+      message += `<[${pr.title}](${pr.html_url})>, Reviewers: ${reviewers} \n`
     }
     await sendNotification(webhookUrl, message);
-    await sendNotification(webhookUrl, `@everyone A gentle request to review **${prs.length} pending PRs** under __${title}__ repo. ${prs.length > 10 ? `${count} of them are listed above.` : ''}`);
+    await sendNotification(webhookUrl, `@everyone A gentle request to review **${prs.length} pending PRs** under __${title}__ repo.`);
     core.info(`Notification sent successfully!`);
   }
 }

@@ -858,7 +858,11 @@ async function doRepo(pulls_endpoint, webhookUrl, title) {
       for (const user of pr.requested_reviewers)
         reviewers += ` <@${discordIDs[user.login] || user.login}>`
 
-      message += `<[${pr.title}](${pr.html_url})>, Reviewers: ${reviewers} \n`
+      message += `<[${pr.title}](${pr.html_url})>, Reviewers: ${reviewers}`
+      const seconds = Date.now() - new Date(pr.created_at)
+      const pendingWeeks = Math.round(seconds/604800000)
+      if (pendingWeeks >= 2) message += `😱 **(Pending for ${pendingWeeks} weeks)** 😱`
+      message += '\n'
     }
     await sendNotification(webhookUrl, message);
     await sendNotification(webhookUrl, `@everyone A gentle request to review **${prs.length} pending PRs** under __${title}__ repo.`);

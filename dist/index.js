@@ -821,6 +821,13 @@ const discordIDs = {
   'STetsing': '802198368340017153'
 }
 
+const emojis = {
+  '3' : "🙄",
+  '4' : "🫣",
+  '5' : "😲",
+  '6' : "😱"
+}
+
 function getPullRequests(endPoint) {
   return axios({
     method: 'GET',
@@ -861,11 +868,11 @@ async function doRepo(pulls_endpoint, webhookUrl, title) {
       message += `<[${pr.title}](${pr.html_url})>, Reviewers: ${reviewers}`
       const seconds = Date.now() - new Date(pr.created_at)
       const pendingWeeks = Math.round(seconds/604800000)
-      if (pendingWeeks >= 2) message += `😱 **(Pending for ${pendingWeeks} weeks)** 😱`
+      if (pendingWeeks >= 3) message += `${emojis[pendingWeeks] || "🤯"} **(Pending for ${pendingWeeks} weeks)** ${emojis[pendingWeeks] || "🤯"}`
       message += '\n'
     }
     await sendNotification(webhookUrl, message);
-    await sendNotification(webhookUrl, `@everyone A gentle request to review **${prs.length} pending PRs** under __${title}__ repo.`);
+    await sendNotification(webhookUrl, `@everyone 🎗️ A gentle reminder to review **${prs.length} pending PRs** under __${title}__ repo.`);
     core.info(`Notification sent successfully!`);
   }
 }

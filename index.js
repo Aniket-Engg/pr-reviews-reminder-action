@@ -2,10 +2,6 @@
 const core = require('@actions/core');
 const axios = require('axios');
 
-const {
-  getPullRequestsWithRequestedReviewers,
-} = require("./functions");
-
 const GITHUB_API_URL = 'https://api.github.com';
 const { GITHUB_TOKEN, GITHUB_REPOSITORY } = process.env;
 const AUTH_HEADER = {
@@ -54,9 +50,9 @@ function sendEmbeds(webhookUrl, embeds) {
   })
 }
 
-async function doRepo(pulls_endpoint, webhookUrl, title) {
+async function sendReminder(pulls_endpoint, webhookUrl, title) {
   const pullRequests = await getPullRequests(pulls_endpoint);
-  const prs = getPullRequestsWithRequestedReviewers(pullRequests.data);
+  const prs = pullRequests.data.filter(pr => pr.requested_reviewers.length);
   core.info(`There are ${prs.length} pull requests waiting for reviews`);
   if (prs.length) {
     let message = ''
@@ -81,11 +77,23 @@ async function doRepo(pulls_endpoint, webhookUrl, title) {
 async function main() {
   try {
     const webhookUrl = core.getInput('webhook-url');   
-    core.info('Getting open pull requests...');
-    await doRepo(PULLS_ENDPOINT, webhookUrl, 'remix-project')
-    await doRepo(`${GITHUB_API_URL}/repos/ethereum/remix-plugins-directory/pulls`, webhookUrl, 'remix-plugins-directory')
-    await doRepo(`${GITHUB_API_URL}/repos/ethereum/remix-ide/pulls`, webhookUrl, 'remix-ide')
-    await doRepo(`${GITHUB_API_URL}/repos/ethereum/remix-desktop/pulls`, webhookUrl, 'remix-desktop')   
+    const freezeDate = core.getInput('freeze-date');
+    if (freezeDate) {
+      const ffDate = new Date(freezeDate)
+      const today = Date.now()
+      if (ffDate < today) await sendNotification(webhookUrl, '👉 Feature freeze date is passed. Please set a new date');
+      else {
+        const seconds = ffDate - today
+        const remainingDays = Math.round(seconds/86400000)
+        if (remainingDays <= 3) {
+          core.info('Getting open pull requests...');
+          await sendReminder(PULLS_ENDPOINT, webhookUrl, 'remix-project')
+          await sendReminder(`${GITHUB_API_URL}/repos/ethereum/remix-plugins-directory/pulls`, webhookUrl, 'remix-plugins-directory')
+          await sendReminder(`${GITHUB_API_URL}/repos/ethereum/remix-ide/pulls`, webhookUrl, 'remix-ide')
+          await sendReminder(`${GITHUB_API_URL}/repos/ethereum/remix-desktop/pulls`, webhookUrl, 'remix-desktop')  
+        }
+      }
+    }   
   } catch (error) {
     core.error(error)
     core.setFailed(error.message);

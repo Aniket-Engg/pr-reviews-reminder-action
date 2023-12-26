@@ -835,7 +835,7 @@ function sendEmbeds(webhookUrl, embeds) {
   })
 }
 
-async function sendReminder(pulls_endpoint, webhookUrl, title) {
+async function sendReminder(pulls_endpoint, webhookUrl, title, remainingDays) {
   const pullRequests = await getPullRequests(pulls_endpoint);
   const prs = pullRequests.data.filter(pr => pr.requested_reviewers.length);
   core.info(`There are ${prs.length} pull requests waiting for reviews`);
@@ -854,7 +854,7 @@ async function sendReminder(pulls_endpoint, webhookUrl, title) {
       message += '\n'
     }
     await sendNotification(webhookUrl, message);
-    await sendNotification(webhookUrl, `@everyone 🎗️ A gentle reminder to review **${prs.length} pending PRs** under __${title}__ repo.`);
+    await sendNotification(webhookUrl, `@everyone 🎗️ Gentle Reminder: ${remainingDays} days left in feature freeze. Please review **${prs.length} pending PRs** under __${title}__ repo.`);
     core.info(`Notification sent successfully!`);
   }
 }
@@ -872,10 +872,10 @@ async function main() {
         const remainingDays = Math.round(seconds/86400000)
         if (remainingDays <= 3) {
           core.info('Getting open pull requests...');
-          await sendReminder(PULLS_ENDPOINT, webhookUrl, 'remix-project')
-          await sendReminder(`${GITHUB_API_URL}/repos/ethereum/remix-plugins-directory/pulls`, webhookUrl, 'remix-plugins-directory')
-          await sendReminder(`${GITHUB_API_URL}/repos/ethereum/remix-ide/pulls`, webhookUrl, 'remix-ide')
-          await sendReminder(`${GITHUB_API_URL}/repos/ethereum/remix-desktop/pulls`, webhookUrl, 'remix-desktop')  
+          await sendReminder(PULLS_ENDPOINT, webhookUrl, 'remix-project', remainingDays)
+          await sendReminder(`${GITHUB_API_URL}/repos/ethereum/remix-plugins-directory/pulls`, webhookUrl, 'remix-plugins-directory', remainingDays)
+          await sendReminder(`${GITHUB_API_URL}/repos/ethereum/remix-ide/pulls`, webhookUrl, 'remix-ide', remainingDays)
+          await sendReminder(`${GITHUB_API_URL}/repos/ethereum/remix-desktop/pulls`, webhookUrl, 'remix-desktop', remainingDays)  
         }
       }
     }   

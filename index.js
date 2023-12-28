@@ -74,11 +74,23 @@ async function sendReminder(pulls_endpoint, webhookUrl, title, remainingDays) {
   }
 }
 
+async function checkServices() {
+  const webhookUrl = core.getInput('sc-webhook-url');
+  if (webhookUrl) {
+    const servicesDetails = await axios.get('https://status.remixproject.org:7777/servicestatus.json')
+    let failedServices = []
+    for (const service of servicesDetails.data) {
+      if(service.status === 'false') failedServices.push(service.name)
+    }
+    await sendNotification(webhookUrl, `@everyone ${failedServices.join(',')} services are down!`)
+  }  
+}
+
 async function main() {
   try {
     const webhookUrl = core.getInput('webhook-url');   
     const freezeDate = core.getInput('freeze-date');
-    if (freezeDate) {
+    if (webhookUrl && freezeDate) {
       const ffDate = new Date(freezeDate)
       const today = Date.now()
       if (ffDate < today) await sendNotification(webhookUrl, '👉 Feature freeze date is passed. Please set a new date');
@@ -101,3 +113,4 @@ async function main() {
 }
 
 main();
+checkServices();

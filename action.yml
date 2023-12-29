@@ -5,20 +5,15 @@ branding:
   color: 'red'
 inputs:
   webhook-url:
-    description: 'Webhook URL'
+    description: 'Discord Webhook URL'
     required: true
-  provider:
-    description: 'Provider: slack or msteams'
+  freeze-date:
+    description: 'Feature freeze date'
     required: true
     default: 'slack'
-  channel:
-    description: 'Channel name'
+  sc-webhook-url:
+    description: 'Service checker webhook url'
     required: false
-    default: '#general'
-  github-provider-map:
-    description: 'Map GitHub username to Slack user IDs. Eg: "DavideViolante:UABCDEFGH,foobar123:UIHJKLMNO"'
-    required: false
-    default: false
 runs:
   using: 'node12'
   main: 'dist/index.js'

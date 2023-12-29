@@ -83,7 +83,7 @@ async function checkServices() {
     for (const service of servicesDetails.data) {
       if(service.status === 'false') failedServices.push(service.name)
     }
-    await sendNotification(webhookUrl, `@everyone ${failedServices.join(', ')} services are down!`)
+    if (failedServices.length) await sendNotification(webhookUrl, `👉 @everyone **${failedServices.join(', ')}** services are down!`)
   }  
 }
 

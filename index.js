@@ -15,7 +15,8 @@ const discordIDs = {
   'bunsenstraat': '660074606539046915',
   'joeizang': '629376310812344330',
   'vermouth22': '678640402261082132',
-  'STetsing': '802198368340017153'
+  'STetsing': '802198368340017153',
+  'ryestew': '425257671336394754'
 }
 
 const emojis = {

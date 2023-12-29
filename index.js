@@ -69,7 +69,7 @@ async function sendReminder(pulls_endpoint, webhookUrl, title, remainingDays) {
       message += '\n'
     }
     await sendNotification(webhookUrl, message);
-    await sendNotification(webhookUrl, `@everyone 🎗️ Gentle Reminder: ${remainingDays} days left in feature freeze. Please review **${prs.length} pending PRs** under __${title}__ repo.`);
+    await sendNotification(webhookUrl, `@everyone 🎗️ Gentle Reminder: **${remainingDays} days left** in feature freeze. Please review **${prs.length} pending PRs** under __${title}__ repo.`);
     core.info(`Notification sent successfully!`);
   }
 }

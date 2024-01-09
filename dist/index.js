@@ -879,7 +879,11 @@ async function main() {
     if (webhookUrl && freezeDate) {
       const ffDate = new Date(freezeDate)
       const today = Date.now()
-      if (ffDate < today) await sendNotification(webhookUrl, '👉 Feature freeze date is passed. Please set a new date');
+      if (ffDate < today) {
+        const seconds = today - ffDate
+        const passedDays = Math.round(seconds/86400000)
+        if (passedDays >= 2) await sendNotification(webhookUrl, `👉 ${passedDays} days passed from previous feature freeze. Please set a new date`);
+      }
       else {
         const seconds = ffDate - today
         const remainingDays = Math.round(seconds/86400000)

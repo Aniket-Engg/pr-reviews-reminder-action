@@ -5442,8 +5442,8 @@ async function main() {
           await sendReminderToReview(`${GITHUB_API_URL}/repos/ethereum/remix-plugins-directory/pulls`, webhookUrl, 'remix-plugins-directory', remainingDays)
           await sendReminderToReview(`${GITHUB_API_URL}/repos/ethereum/remix-ide/pulls`, webhookUrl, 'remix-ide', remainingDays)
           await sendReminderToReview(`${GITHUB_API_URL}/repos/ethereum/remix-desktop/pulls`, webhookUrl, 'remix-desktop', remainingDays)  
-        }
-      } else await sendReminderForProjectAndReviewers(webhookUrl)
+        } else await sendReminderForProjectAndReviewers(webhookUrl)
+      } 
     }   
   } catch (error) {
     core.error(error)

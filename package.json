@@ -19,10 +19,11 @@
   "homepage": "https://github.com/DavideViolante/pr-reviews-reminder-action#readme",
   "dependencies": {
     "@actions/core": "^1.2.6",
+    "@octokit/graphql": "^7.0.2",
     "axios": "^0.21.1"
   },
   "devDependencies": {
-    "@zeit/ncc": "^0.22.3",
+    "@vercel/ncc": "^0.38.1",
     "eslint": "^7.16.0",
     "mocha": "^8.2.1"
   }

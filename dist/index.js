@@ -5406,6 +5406,7 @@ async function sendReminderForProjectAndReviewers(webhookUrl) {
     }
   }
   await sendNotification(webhookUrl, message);
+  core.info(`sendReminderForProjectAndReviewers done successfully!`);
 }
 
 async function checkServices() {
@@ -5442,7 +5443,7 @@ async function main() {
           await sendReminderToReview(`${GITHUB_API_URL}/repos/ethereum/remix-ide/pulls`, webhookUrl, 'remix-ide', remainingDays)
           await sendReminderToReview(`${GITHUB_API_URL}/repos/ethereum/remix-desktop/pulls`, webhookUrl, 'remix-desktop', remainingDays)  
         }
-      } else sendReminderForProjectAndReviewers(webhookUrl)
+      } else await sendReminderForProjectAndReviewers(webhookUrl)
     }   
   } catch (error) {
     core.error(error)

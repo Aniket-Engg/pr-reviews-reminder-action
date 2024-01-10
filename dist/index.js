@@ -5398,10 +5398,11 @@ async function sendReminderForProjectAndReviewers(webhookUrl) {
     const { node } = e
     const seconds = Date.now() - new Date(node.createdAt)
     const pendingWeeks = Math.round(seconds/604800000)
-    if (pendingWeeks >= 1 && (node.projectCards.totalCount === 0 || (node.reviewRequests.totalCount === 0 && node.reviews.totalCount === 0))) {
-      message += `<[${node.title}](${node.url})> : **(Pending for ${pendingWeeks} weeks)**`
-      message += `${node.projectCards.totalCount === 0 ? ' No Project Assigned' : ''}`
+    if (pendingWeeks >= 1 && !node.isDraft && (node.projectCards.totalCount === 0 || (node.reviewRequests.totalCount === 0 && node.reviews.totalCount === 0))) {
+      message += `<[${node.title}](${node.url})> : Pending for **${pendingWeeks} weeks**`
+      message += `${node.projectCards.totalCount === 0 ? ', No Project Assigned' : ''}`
       message += `${(node.reviewRequests.totalCount === 0 && node.reviews.totalCount === 0) ? ' & No Reviewers Assigned' : ''}`
+      message += `, Author: <@${discordIDs[node.author.login] || node.author.login}>`
       message += '\n'
     }
   }

@@ -786,6 +786,7 @@ exports.issueCommand = issueCommand;
 
 const core = __webpack_require__(470);
 const axios = __webpack_require__(53);
+const { graphql } = __webpack_require__(246)
 
 const GITHUB_API_URL = 'https://api.github.com';
 const { GITHUB_TOKEN, GITHUB_REPOSITORY } = process.env;
@@ -793,6 +794,38 @@ const AUTH_HEADER = {
   Authorization: `token ${GITHUB_TOKEN}`
 };
 const PULLS_ENDPOINT = `${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/pulls`;
+
+const query = `
+{
+  repository(owner: "ethereum", name: "remix-project") {
+    pullRequests(last:20, states: OPEN) {
+      totalCount
+      edges {
+        node {
+          title
+          createdAt
+          url
+          state
+          projectCards (last: 3)
+          { 
+            totalCount
+          }
+          reviewRequests {
+            totalCount
+          }
+          reviews {
+            totalCount
+          }
+          isDraft
+          author {
+            login
+          }
+        }
+      }
+    }
+  }
+}
+`
 
 const discordIDs = {
   'Aniket-Engg' : '621970622716575747',
@@ -836,7 +869,7 @@ function sendEmbeds(webhookUrl, embeds) {
   })
 }
 
-async function sendReminder(pulls_endpoint, webhookUrl, title, remainingDays) {
+async function sendReminderToReview(pulls_endpoint, webhookUrl, title, remainingDays) {
   const pullRequests = await getPullRequests(pulls_endpoint);
   const prs = pullRequests.data.filter(pr => pr.requested_reviewers.length);
   core.info(`There are ${prs.length} pull requests waiting for reviews`);
@@ -858,6 +891,23 @@ async function sendReminder(pulls_endpoint, webhookUrl, title, remainingDays) {
     await sendNotification(webhookUrl, `@everyone 🎗️ Gentle Reminder: **${remainingDays} days left** in feature freeze. Please review **${prs.length} pending PRs** under __${title}__ repo.`);
     core.info(`Notification sent successfully!`);
   }
+}
+
+async function sendReminderForProjectAndReviewers(webhookUrl) {
+  const { repository } = await graphql(query, { headers: AUTH_HEADER})
+  let message = ''
+  for (const e of repository.pullRequests.edges) {
+    const { node } = e
+    const seconds = Date.now() - new Date(node.createdAt)
+    const pendingWeeks = Math.round(seconds/604800000)
+    if (pendingWeeks >= 1 && (node.projectCards.totalCount === 0 || (node.reviewRequests.totalCount === 0 && node.reviews.totalCount === 0))) {
+      message += `<[${node.title}](${node.url})> : **(Pending for ${pendingWeeks} weeks)**`
+      message += `${node.projectCards.totalCount === 0 ? ' No Project Assigned' : ''}`
+      message += `${(node.reviewRequests.totalCount === 0 && node.reviews.totalCount === 0) ? ' & No Reviewers Assigned' : ''}`
+      message += '\n'
+    }
+  }
+  await sendNotification(webhookUrl, message);
 }
 
 async function checkServices() {
@@ -884,17 +934,17 @@ async function main() {
         const passedDays = Math.round(seconds/86400000)
         if (passedDays >= 2) await sendNotification(webhookUrl, `👉 ${passedDays} days passed from previous feature freeze. Please set a new date`);
       }
-      else {
+      else if (ffDate > today) {
         const seconds = ffDate - today
         const remainingDays = Math.round(seconds/86400000)
         if (remainingDays <= 3) {
           core.info('Getting open pull requests...');
-          await sendReminder(PULLS_ENDPOINT, webhookUrl, 'remix-project', remainingDays)
-          await sendReminder(`${GITHUB_API_URL}/repos/ethereum/remix-plugins-directory/pulls`, webhookUrl, 'remix-plugins-directory', remainingDays)
-          await sendReminder(`${GITHUB_API_URL}/repos/ethereum/remix-ide/pulls`, webhookUrl, 'remix-ide', remainingDays)
-          await sendReminder(`${GITHUB_API_URL}/repos/ethereum/remix-desktop/pulls`, webhookUrl, 'remix-desktop', remainingDays)  
+          await sendReminderToReview(PULLS_ENDPOINT, webhookUrl, 'remix-project', remainingDays)
+          await sendReminderToReview(`${GITHUB_API_URL}/repos/ethereum/remix-plugins-directory/pulls`, webhookUrl, 'remix-plugins-directory', remainingDays)
+          await sendReminderToReview(`${GITHUB_API_URL}/repos/ethereum/remix-ide/pulls`, webhookUrl, 'remix-ide', remainingDays)
+          await sendReminderToReview(`${GITHUB_API_URL}/repos/ethereum/remix-desktop/pulls`, webhookUrl, 'remix-desktop', remainingDays)  
         }
-      }
+      } else sendReminderForProjectAndReviewers(webhookUrl)
     }   
   } catch (error) {
     core.error(error)
@@ -1241,6 +1291,14 @@ module.exports = function xhrAdapter(config) {
     request.send(requestData);
   });
 };
+
+
+/***/ }),
+
+/***/ 246:
+/***/ (function(module) {
+
+module.exports = eval("require")("@octokit/graphql");
 
 
 /***/ }),

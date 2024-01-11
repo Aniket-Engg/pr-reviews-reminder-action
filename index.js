@@ -96,7 +96,7 @@ async function sendReminderToReview(pulls_endpoint, webhookUrl, title, remaining
       for (const user of pr.requested_reviewers)
         reviewers += ` <@${discordIDs[user.login] || user.login}>`
 
-      message += `<[${pr.title}](${pr.html_url})>, Reviewers: ${reviewers}`
+      message += `- <[${pr.title}](${pr.html_url})>, Reviewers: ${reviewers}`
       const seconds = Date.now() - new Date(pr.created_at)
       const pendingWeeks = Math.round(seconds/604800000)
       if (pendingWeeks >= 3) message += `${emojis[pendingWeeks] || "🤯"} **(Pending for ${pendingWeeks} weeks)** ${emojis[pendingWeeks] || "🤯"}`
@@ -118,7 +118,7 @@ async function sendReminderForProjectAndReviewers(webhookUrl) {
     if (pendingWeeks >= 1 && !node.isDraft && (node.projectCards.totalCount === 0 || (node.reviewRequests.totalCount === 0 && node.reviews.totalCount === 0))) {
       message += `- <@${discordIDs[node.author.login] || node.author.login}> <[${node.title}](${node.url})> , Opened **${pendingWeeks} weeks** ago,`
       message += `${node.projectCards.totalCount === 0 ? ' __No Project__' : ''}`
-      message += `${(node.reviewRequests.totalCount === 0 && node.reviews.totalCount === 0) ? '& __No Reviewers__' : ''}`
+      message += `${(node.reviewRequests.totalCount === 0 && node.reviews.totalCount === 0) ? ' & __No Reviewers__' : ''}`
       message += ` Assigned`
       message += '\n'
     }

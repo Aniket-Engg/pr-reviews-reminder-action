@@ -5387,22 +5387,22 @@ async function sendReminderToReview(pulls_endpoint, webhookUrl, title, remaining
     }
     await sendNotification(webhookUrl, message);
     await sendNotification(webhookUrl, `@everyone 🎗️ Gentle Reminder: **${remainingDays} days left** in feature freeze. Please review **${prs.length} pending PRs** under __${title}__ repo.`);
-    core.info(`Notification sent successfully!`);
+    core.info(`sendReminderToReview sent successfully!`);
   }
 }
 
 async function sendReminderForProjectAndReviewers(webhookUrl) {
   const { repository } = await graphql(query, { headers: AUTH_HEADER})
-  let message = ''
+  let message = `List of PRs having no project and/or reviewers assigned yet:\n`
   for (const e of repository.pullRequests.edges) {
     const { node } = e
     const seconds = Date.now() - new Date(node.createdAt)
     const pendingWeeks = Math.round(seconds/604800000)
     if (pendingWeeks >= 1 && !node.isDraft && (node.projectCards.totalCount === 0 || (node.reviewRequests.totalCount === 0 && node.reviews.totalCount === 0))) {
-      message += `<[${node.title}](${node.url})> : Pending for **${pendingWeeks} weeks**`
-      message += `${node.projectCards.totalCount === 0 ? ', No Project Assigned' : ''}`
-      message += `${(node.reviewRequests.totalCount === 0 && node.reviews.totalCount === 0) ? ' & No Reviewers Assigned' : ''}`
-      message += `, Author: <@${discordIDs[node.author.login] || node.author.login}>`
+      message += `- <@${discordIDs[node.author.login] || node.author.login}> <[${node.title}](${node.url})> , Opened **${pendingWeeks} weeks** ago,`
+      message += `${node.projectCards.totalCount === 0 ? ' __No Project__' : ''}`
+      message += `${(node.reviewRequests.totalCount === 0 && node.reviews.totalCount === 0) ? '& __No Reviewers__' : ''}`
+      message += ` Assigned`
       message += '\n'
     }
   }

@@ -91,19 +91,24 @@ async function sendReminderToReview(pulls_endpoint, webhookUrl, title, remaining
   if (prs.length) {
     let message = ''
     for (let i=0; i < prs.length; i++) {
+      console.log('message length:', message.length)
+      if (message.length > 1850) {
+        await sendNotification(webhookUrl, message);
+        message = ''
+      }
       const pr = prs[i]      
       let reviewers = ''
       for (const user of pr.requested_reviewers)
         reviewers += ` <@${discordIDs[user.login] || user.login}>`
 
-      message += `- <[${pr.title}](${pr.html_url})>, Reviewers: ${reviewers}`
+      message += `- <[${pr.title}](${pr.html_url})>, __Reviewers:__ ${reviewers}`
       const seconds = Date.now() - new Date(pr.created_at)
       const pendingWeeks = Math.round(seconds/604800000)
-      if (pendingWeeks >= 3) message += `${emojis[pendingWeeks] || "🤯"} **(Pending for ${pendingWeeks} weeks)** ${emojis[pendingWeeks] || "🤯"}`
+      if (pendingWeeks >= 3) message += `, **(Pending for ${pendingWeeks} weeks)** ${emojis[pendingWeeks] || "🤯"}`
       message += '\n'
     }
     await sendNotification(webhookUrl, message);
-    await sendNotification(webhookUrl, `@everyone 🎗️ Gentle Reminder: **${remainingDays} days left** in feature freeze. Please review **${prs.length} pending PRs** under __${title}__ repo.`);
+    await sendNotification(webhookUrl, `@everyone 👉 Gentle Reminder: **${remainingDays} days left** in feature freeze. Please review **${prs.length} pending PRs** under __${title}__ repo.`);
     core.info(`sendReminderToReview sent successfully!`);
   }
 }
@@ -112,6 +117,11 @@ async function sendReminderForProjectAndReviewers(webhookUrl) {
   const { repository } = await graphql(query, { headers: AUTH_HEADER})
   let message = `List of PRs having no project and/or reviewers assigned yet:\n`
   for (const e of repository.pullRequests.edges) {
+    console.log('message length:', message.length)
+    if (message.length > 1900) {
+      await sendNotification(webhookUrl, message);
+      message = ''
+    }
     const { node } = e
     const seconds = Date.now() - new Date(node.createdAt)
     const pendingWeeks = Math.round(seconds/604800000)

@@ -5375,7 +5375,7 @@ async function sendReminderToReview(pulls_endpoint, webhookUrl, title, remaining
     let message = ''
     for (let i=0; i < prs.length; i++) {
       console.log('message length:', message.length)
-      if (message.length > 1900) {
+      if (message.length > 1850) {
         await sendNotification(webhookUrl, message);
         message = ''
       }

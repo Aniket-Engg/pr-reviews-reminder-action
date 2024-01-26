@@ -5385,6 +5385,7 @@ async function sendReminderToReview(pulls_endpoint, webhookUrl, title, remaining
       if (pendingWeeks >= 3) message += `${emojis[pendingWeeks] || "🤯"} **(Pending for ${pendingWeeks} weeks)** ${emojis[pendingWeeks] || "🤯"}`
       message += '\n'
     }
+    console.log('message=======>', message)
     await sendNotification(webhookUrl, message);
     await sendNotification(webhookUrl, `@everyone 🎗️ Gentle Reminder: **${remainingDays} days left** in feature freeze. Please review **${prs.length} pending PRs** under __${title}__ repo.`);
     core.info(`sendReminderToReview sent successfully!`);

@@ -97,7 +97,9 @@ async function sendReminderToReview(pulls_endpoint, webhookUrl, title, remaining
         await sendNotification(webhookUrl, message);
         message = ''
       }
-      const pr = prs[i]      
+      const pr = prs[i] 
+      const wipLabelIndex = pr.labels.findIndex(labelObj => labelObj.name === 'WIP')
+      if (wipLabelIndex > -1) continue   
       let reviewers = ''
       for (const user of pr.requested_reviewers)
         reviewers += ` <@${discordIDs[user.login] || user.login}>`

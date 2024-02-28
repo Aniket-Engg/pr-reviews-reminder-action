@@ -111,7 +111,7 @@ async function sendReminderToReview(pulls_endpoint, webhookUrl, title, remaining
       message += '\n'
     }
     await sendNotification(webhookUrl, message);
-    await sendNotification(webhookUrl, `@everyone 👉 Gentle Reminder: **${remainingDays} days left** in feature freeze. Please review **${prs.length} pending PRs** under __${title}__ repo.`);
+    await sendNotification(webhookUrl, `🌅 Good Morning @everyone , **${remainingDays} days left** in feature freeze for this release. Please review above 👆 PRs from __${title}__ repo.`);
     core.info(`sendReminderToReview sent successfully!`);
   }
 }
@@ -148,7 +148,7 @@ async function checkServices() {
     for (const service of servicesDetails.data) {
       if(service.status === 'false') failedServices.push(service.name)
     }
-    if (failedServices.length) await sendNotification(webhookUrl, `👉 @everyone **${failedServices.join(', ')}** services are down!`)
+    if (failedServices.length) await sendNotification(webhookUrl, `👉 @everyone **${failedServices.join(', ')}** services are down! 😱😱`)
   }  
 }
 
@@ -162,18 +162,20 @@ async function main() {
       if (ffDate < today) {
         const seconds = today - ffDate
         const passedDays = Math.round(seconds/86400000)
-        if (passedDays >= 2) await sendNotification(webhookUrl, `👉 ${passedDays} days passed from previous feature freeze. Please set a new date`);
+        if (passedDays >= 2) await sendNotification(webhookUrl, `👉 Dear release manager, ${passedDays} days passed from previous feature freeze. Please set a new date`);
       }
       else if (ffDate > today) {
         const seconds = ffDate - today
         const remainingDays = Math.round(seconds/86400000)
-        if (remainingDays <= 3) {
+        if (remainingDays > 5 && remainingDays % 3 === 0) 
+          await sendReminderForProjectAndReviewers(webhookUrl)
+        else {
           core.info('Getting open pull requests...');
           await sendReminderToReview(PULLS_ENDPOINT, webhookUrl, 'remix-project', remainingDays)
           await sendReminderToReview(`${GITHUB_API_URL}/repos/ethereum/remix-plugins-directory/pulls`, webhookUrl, 'remix-plugins-directory', remainingDays)
           await sendReminderToReview(`${GITHUB_API_URL}/repos/ethereum/remix-ide/pulls`, webhookUrl, 'remix-ide', remainingDays)
           await sendReminderToReview(`${GITHUB_API_URL}/repos/ethereum/remix-desktop/pulls`, webhookUrl, 'remix-desktop', remainingDays)  
-        } else await sendReminderForProjectAndReviewers(webhookUrl)
+        }
       } 
     }   
   } catch (error) {

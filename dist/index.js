@@ -5375,8 +5375,8 @@ async function sendReminderToReview(pulls_endpoint, webhookUrl, title, remaining
   if (prs.length) {
     let message = ''
     for (let i=0; i < prs.length; i++) {
-      console.log('message length:', message.length)
-      if (message.length > 1850) {
+      console.log('sendReminderToReview message length:', message.length)
+      if (message.length > 1800) {
         await sendNotification(webhookUrl, message);
         message = ''
       }
@@ -5403,8 +5403,8 @@ async function sendReminderForProjectAndReviewers(webhookUrl) {
   const { repository } = await graphql(query, { headers: AUTH_HEADER})
   let message = `List of PRs having no project and/or reviewers assigned yet:\n`
   for (const e of repository.pullRequests.edges) {
-    console.log('message length:', message.length)
-    if (message.length > 1900) {
+    console.log('sendReminderForProjectAndReviewers message length:', message.length)
+    if (message.length > 1800) {
       await sendNotification(webhookUrl, message);
       message = ''
     }

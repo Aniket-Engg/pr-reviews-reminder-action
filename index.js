@@ -111,7 +111,7 @@ async function sendReminderToReview(pulls_endpoint, webhookUrl, title, remaining
       message += '\n'
     }
     await sendNotification(webhookUrl, message);
-    await sendNotification(webhookUrl, `🌅 Good Morning @everyone , **${remainingDays} days left** in feature freeze for this release. Please review above 👆 PRs from __${title}__ repo.`);
+    await sendNotification(webhookUrl, `🌅 Morning @everyone , PLEASE DON'T IGNORE !!! Only **${remainingDays} days left** in feature freeze. Please review 👆 PRs from __${title}__ .`);
     core.info(`sendReminderToReview sent successfully!`);
   }
 }

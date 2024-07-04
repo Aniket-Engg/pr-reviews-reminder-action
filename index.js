@@ -111,14 +111,14 @@ async function sendReminderToReview(pulls_endpoint, webhookUrl, title, remaining
       message += '\n'
     }
     await sendNotification(webhookUrl, message);
-    await sendNotification(webhookUrl, `🌅 Morning @everyone , PLEASE DON'T IGNORE !!! Only **${remainingDays} days left** in feature freeze. Please review 👆 PRs from __${title}__ .`);
+    await sendNotification(webhookUrl, `💃 Morning @everyone , PLEASE DON'T IGNORE 🕺 Only **${remainingDays} days left** in feature freeze. Please review 👆 PRs from __${title}__ .`);
     core.info(`sendReminderToReview sent successfully!`);
   }
 }
 
 async function sendReminderForProjectAndReviewers(webhookUrl) {
   const { repository } = await graphql(query, { headers: AUTH_HEADER})
-  let message = `List of PRs having no project and/or reviewers assigned yet:\n`
+  let message = `🌅 Morning @everyone, See the PRs having no project and/or reviewers assigned yet and PLEASE TAKE APPROPRIATE ACTION:\n`
   for (const e of repository.pullRequests.edges) {
     console.log('sendReminderForProjectAndReviewers message length:', message.length)
     if (message.length > 1800) {

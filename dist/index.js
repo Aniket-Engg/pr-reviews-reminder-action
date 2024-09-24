@@ -5394,8 +5394,8 @@ async function sendReminderToReview(pulls_endpoint, webhookUrl, title, remaining
       message += '\n'
     }
     await sendNotification(webhookUrl, message);
-    const infoMsg = remainingDays === 0 ? 'WE HAVE FEATURE FREEZE TODAY. Please get your PRs for this release REVIEWED and MERGED ASAP.' : `PLEASE DON'T IGNORE 🕺 Only **${remainingDays} days left** in feature freeze. Please review 👆 PRs from __${title}__ .`
-    await sendNotification(webhookUrl, `💃 Morning @everyone , ${infoMsg}`);
+    const infoMsg = remainingDays === 0 ? '💥💥 WE HAVE FEATURE FREEZE TODAY 💥💥 Please REVIEW & MERGE PRs ASAP to avoid delay in quick release.' : `💥 THIS IS IMPORTANT 💥 Only **${remainingDays} days left** in FEATURE FREEZE. Have a look to 👆 PRs from __${title}__ .`
+    await sendNotification(webhookUrl, `🌄 Morning @everyone , ${infoMsg}`);
     core.info(`sendReminderToReview sent successfully!`);
   }
 }

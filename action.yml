@@ -9,8 +9,7 @@ inputs:
     required: true
   freeze-date:
     description: 'Feature freeze date'
-    required: true
-    default: 'slack'
+    required: false
   sc-webhook-url:
     description: 'Service checker webhook url'
     required: false

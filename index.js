@@ -178,7 +178,9 @@ async function main() {
           await sendReminderToReview(`${GITHUB_API_URL}/repos/ethereum/remix-desktop/pulls`, webhookUrl, 'remix-desktop', remainingDays)  
         }
       } 
-    }   
+    } else if (webhookUrl) {
+      await sendNotification(webhookUrl, `🧍🧍 @everyone Team, time for standup meeting 🧍🧍`);
+    }
   } catch (error) {
     core.error(error)
     core.setFailed(error.message);

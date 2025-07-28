@@ -5293,7 +5293,7 @@ const AUTH_HEADER = {
 };
 const PULLS_ENDPOINT = `${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/pulls`;
 
-const query = `
+const query = (/* unused pure expression or super */ null && (`
 {
   repository(owner: "ethereum", name: "remix-project") {
     pullRequests(last:20, states: OPEN) {
@@ -5323,24 +5323,23 @@ const query = `
     }
   }
 }
-`
+`))
 
 const discordIDs = {
   'Aniket-Engg' : '621970622716575747',
   'yann300': '425335058652463117',
-  'bunsenstraat': '660074606539046915',
   'joeizang': '629376310812344330',
   'vermouth22': '678640402261082132',
   'STetsing': '802198368340017153',
   'ryestew': '425257671336394754',
-  'LianaHus': '426140880618127360'
+  'ioedeveloper': '677427160104828929'
 }
 
 const emojis = {
   '3' : "🙄",
   '4' : "🫣",
   '5' : "😲",
-  '6' : "😱"
+  '6' : "😱😱"
 }
 
 function getPullRequests(endPoint) {
@@ -5368,7 +5367,7 @@ function sendEmbeds(webhookUrl, embeds) {
   })
 }
 
-async function sendReminderToReview(pulls_endpoint, webhookUrl, title, remainingDays) {
+async function sendReminderToReview(pulls_endpoint, webhookUrl, title) {
   const pullRequests = await getPullRequests(pulls_endpoint);
   const prs = pullRequests.data.filter(pr => pr.requested_reviewers.length);
   core.info(`There are ${prs.length} pull requests waiting for reviews`);
@@ -5394,7 +5393,7 @@ async function sendReminderToReview(pulls_endpoint, webhookUrl, title, remaining
       message += '\n'
     }
     await sendNotification(webhookUrl, message);
-    const infoMsg = remainingDays === 0 ? '💥💥 WE HAVE FEATURE FREEZE TODAY 💥💥 Please REVIEW & MERGE PRs ASAP to avoid delay in quick release.' : `💥 THIS IS IMPORTANT 💥 Only **${remainingDays} days left** in FEATURE FREEZE. Have a look to 👆 PRs from __${title}__ .`
+    const infoMsg = `Please have a look to 👆 PRs pending to review from __${title}__ .`
     await sendNotification(webhookUrl, `🌄 Morning @everyone , ${infoMsg}`);
     core.info(`sendReminderToReview sent successfully!`);
   }
@@ -5441,28 +5440,28 @@ async function main() {
     const webhookUrl = core.getInput('webhook-url');   
     const freezeDate = core.getInput('freeze-date');
     if (webhookUrl && freezeDate) {
-      const ffDate = new Date(freezeDate)
-      const today = Date.now()
-      if (ffDate < today) {
-        const seconds = today - ffDate
-        const passedDays = Math.round(seconds/86400000)
-        if (passedDays >= 2) await sendNotification(webhookUrl, `👉 Dear release manager, ${passedDays} days passed from previous feature freeze. Please set a new date`);
-      }
-      else if (ffDate > today) {
-        const seconds = ffDate - today
-        const remainingDays = Math.round(seconds/86400000)
-        if (remainingDays > 5 && remainingDays % 3 === 0) 
-          await sendReminderForProjectAndReviewers(webhookUrl)
-        else {
+      // const ffDate = new Date(freezeDate)
+      // const today = Date.now()
+      // if (ffDate < today) {
+      //   const seconds = today - ffDate
+      //   const passedDays = Math.round(seconds/86400000)
+      //   if (passedDays >= 2) await sendNotification(webhookUrl, `👉 Dear release manager, ${passedDays} days passed from previous feature freeze. Please set a new date`);
+      // }
+      // else if (ffDate > today) {
+        // const seconds = ffDate - today
+        // const remainingDays = Math.round(seconds/86400000)
+        // if (remainingDays > 5 && remainingDays % 3 === 0) 
+        //   await sendReminderForProjectAndReviewers(webhookUrl)
+        // else {
           core.info('Getting open pull requests...');
-          await sendReminderToReview(PULLS_ENDPOINT, webhookUrl, 'remix-project', remainingDays)
-          await sendReminderToReview(`${GITHUB_API_URL}/repos/ethereum/remix-plugins-directory/pulls`, webhookUrl, 'remix-plugins-directory', remainingDays)
-          await sendReminderToReview(`${GITHUB_API_URL}/repos/ethereum/remix-ide/pulls`, webhookUrl, 'remix-ide', remainingDays)
-          await sendReminderToReview(`${GITHUB_API_URL}/repos/ethereum/remix-desktop/pulls`, webhookUrl, 'remix-desktop', remainingDays)  
-        }
-      } 
+          await sendReminderToReview(PULLS_ENDPOINT, webhookUrl, 'remix-project')
+          await sendReminderToReview(`${GITHUB_API_URL}/repos/ethereum/remix-plugins-directory/pulls`, webhookUrl, 'remix-plugins-directory')
+          await sendReminderToReview(`${GITHUB_API_URL}/repos/ethereum/remix-ide/pulls`, webhookUrl, 'remix-ide')
+          await sendReminderToReview(`${GITHUB_API_URL}/repos/ethereum/remix-desktop/pulls`, webhookUrl, 'remix-desktop')  
+        // }
+      // } 
     } else if (webhookUrl) {
-      await sendNotification(webhookUrl, `🧍🧍 @everyone Team, time for standup meeting 🧍🧍`);
+      await sendNotification(webhookUrl, `🧍🧍 @everyone Team, Please join for standup meeting 🧍🧍`);
     }
   } catch (error) {
     core.error(error)
